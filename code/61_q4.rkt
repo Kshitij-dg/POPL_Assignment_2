@@ -37,7 +37,7 @@
         (collect (cdr remaining)
                  (cons (f (car remaining)) reversed-result)))))
 
-                 ;; (make-inserter x len-ok?) -> function of one list
+;; (make-inserter x len-ok?) -> function of one list
 ;; Input: x, an atom; len-ok?, a predicate on one number.
 ;; Output: a closure that takes a (possibly nested) list. For every list at
 ;; every level, including the top-level list, it inserts x at the front if
@@ -64,3 +64,13 @@
                   (process-list e)
                   e))))
     process-list))
+
+;; (insert-if-short x lst n) -> new list
+;; Input: x, an atom; lst, a proper, possibly nested list; n, an integer >= 0.
+;; Output: lst with x inserted at the front of every list, at every level and
+;; including lst itself, whose ORIGINAL top-level length is strictly less than n.
+;; Not recursive itself: it builds a "length < n" predicate, passes it to
+;; make-inserter, and applies the resulting inserter to lst. All traversal
+;; is done inside make-inserter.
+(define (insert-if-short x lst n)
+  ((make-inserter x (lambda (len) (< len n))) lst))
