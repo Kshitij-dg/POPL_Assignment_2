@@ -60,3 +60,85 @@
               (list '()               ; a visited node holds what comes after:
                     (caddr left)      ;   the left child's right subtree, then
                     (caddr tree)))))))) ;   the original right subtree
+
+;; (postorder-values tree) -> list of the tree's values in postorder
+;;                            (left subtree, right subtree, node).
+;; tree is either '() or a three-element list (value left right).
+;;
+;; Internally the function works on a "work list" written with the same
+;; three-element shape: ('() item rest) means "first output the postorder of
+;; item, then continue with rest". The '() in the value slot marks such a
+;; work-list cell; real values are numbers or symbols, never '().
+;;
+;; Base case: '() (empty work list or empty tree) -> '().
+;; A real tree is first wrapped as a one-item work list ('() tree '()).
+;; For a work-list cell ('() item rest):
+;;   - item is '()            -> skip it, continue with rest.
+;;   - item is a work-list cell ('() a b)
+;;                            -> flatten to ('() a ('() b rest)).
+;;   - item is a leaf (v () ()) -> output v, continue with rest.
+;;   - item is a node (v l r) -> replace it by three items in this order:
+;;                               l, r, then the leaf (v () ()), so that v
+;;                               is output after both subtrees.
+(define (postorder-values tree)
+  (cond
+    ((null? tree) '())
+    ((not (null? (car tree)))                 ; real tree: wrap it
+     (postorder-values (list '() tree '())))
+    (else
+     (let ((item (cadr tree))
+           (rest (caddr tree)))
+       (cond
+         ((null? item)
+          (postorder-values rest))
+         ((null? (car item))                  ; nested work-list cell: flatten
+          (postorder-values
+           (list '() (cadr item) (list '() (caddr item) rest))))
+         ((and (null? (cadr item)) (null? (caddr item)))  ; leaf: output it
+          (cons (car item) (postorder-values rest)))
+         (else                                ; node: left, right, then root
+          (postorder-values
+           (list '() (cadr item)
+                 (list '() (caddr item)
+                       (list '() (list (car item) '() '()) rest))))))))))
+
+;; (leaf-count tree) -> number of leaves in tree.
+;; tree is either '() or a three-element list (value left right).
+;; A leaf is a node whose left and right subtrees are both '().
+;;
+;; Base case 1: '()            -> 0  (the empty tree has no leaves).
+;; Base case 2: (v () ())      -> 1  (the node itself is a leaf).
+;; Recursive case: (v l r)     -> leaves of l + leaves of r,
+;;                                left subtree counted first.
+(define (leaf-count tree)
+  (cond
+    ((null? tree) 0)
+    ((and (null? (cadr tree)) (null? (caddr tree))) 1)
+    (else
+     (+ (leaf-count (cadr tree))
+        (leaf-count (caddr tree))))))
+
+;; (print-inorder tree) -> prints the inorder list of tree on one line.
+;; tree is either '() or a three-element list (value left right).
+;; Side effect: displays (inorder-values tree), e.g. (1 2 3 4 5 6 7),
+;; followed by exactly one newline. An empty tree prints ().
+(define (print-inorder tree)
+  (begin
+    (display (inorder-values tree))
+    (newline)))
+
+    ;; (print-all-traversals tree) -> prints three lines for tree:
+;;   line 1: inorder list   (left, node, right)
+;;   line 2: preorder list  (node, left, right)
+;;   line 3: postorder list (left, right, node)
+;; tree is either '() or a three-element list (value left right).
+;; Each list is shown with display and followed by exactly one newline;
+;; an empty tree prints () on all three lines.
+(define (print-all-traversals tree)
+  (begin
+    (display (inorder-values tree))
+    (newline)
+    (display (preorder-values tree))
+    (newline)
+    (display (postorder-values tree))
+    (newline)))
