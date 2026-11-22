@@ -15,3 +15,12 @@ candidate_solution([p('Alex',  DeptA, LangA, ProjA),
                 [LangA, LangB, LangC, LangD]),
     permutation(['AI', web, embedded, data],
                 [ProjA, ProjB, ProjC, ProjD]).
+
+% CLUE 1: The friend who prefers the AI project does not work in research
+% and is not Dana.
+% Succeeds when the (unique) person whose project is 'AI' has a department
+% other than research and is not 'Dana'; fails otherwise.
+clue(1, Solution) :-
+    member(p(Name, Dept, _Lang, 'AI'), Solution),
+    Dept \== research,
+    Name \== 'Dana'.
