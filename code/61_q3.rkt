@@ -102,6 +102,18 @@
                  (list '() (caddr item)
                        (list '() (list (car item) '() '()) rest))))))))))
 
+;; (tree-height tree) -> height of tree.
+;; tree is either '() or a three-element list (value left right).
+;;
+;; Base case: '()     -> 0  (the empty tree has height 0).
+;; Recursive case: (v l r) -> 1 + the larger of the heights of l and r,
+;;                            so a single node has height 1.
+(define (tree-height tree)
+  (if (null? tree)
+      0
+      (+ 1 (max (tree-height (cadr tree))
+                (tree-height (caddr tree))))))
+
 ;; (leaf-count tree) -> number of leaves in tree.
 ;; tree is either '() or a three-element list (value left right).
 ;; A leaf is a node whose left and right subtrees are both '().
@@ -127,7 +139,7 @@
     (display (inorder-values tree))
     (newline)))
 
-    ;; (print-all-traversals tree) -> prints three lines for tree:
+;; (print-all-traversals tree) -> prints three lines for tree:
 ;;   line 1: inorder list   (left, node, right)
 ;;   line 2: preorder list  (node, left, right)
 ;;   line 3: postorder list (left, right, node)
@@ -141,4 +153,14 @@
     (display (preorder-values tree))
     (newline)
     (display (postorder-values tree))
+    (newline)))
+
+;; (print-height-and-leaves tree) -> prints (height leaf-count) on one line.
+;; tree is either '() or a three-element list (value left right).
+;; Height of '() is 0; a node's height is 1 + the larger subtree height.
+;; Side effect: displays the two-element list (height leaves), followed by
+;; exactly one newline. An empty tree prints (0 0); a single node (1 1).
+(define (print-height-and-leaves tree)
+  (begin
+    (display (list (tree-height tree) (leaf-count tree)))
     (newline)))
