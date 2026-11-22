@@ -74,3 +74,15 @@
 ;; is done inside make-inserter.
 (define (insert-if-short x lst n)
   ((make-inserter x (lambda (len) (< len n))) lst))
+
+;; (print-insert-result) -> no useful return value; prints one line
+;; Reads three values from standard input with read, in this order:
+;;   x (an atom), lst (a possibly nested list), n (an integer >= 0).
+;; Prints (insert-if-short x lst n) with display, followed by one newline.
+;; Prints no prompts or labels. let* makes the left-to-right read order explicit.
+(define (print-insert-result)
+  (let* ((x (read))
+         (lst (read))
+         (n (read)))
+    (display (insert-if-short x lst n))
+    (newline)))
