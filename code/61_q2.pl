@@ -92,3 +92,19 @@ render_expr(Tree, String) :-
     ;   RightText = RightRaw
     ),
     format(string(String), "~w~w~w", [LeftText, Symbol, RightText]).
+
+    % generate_equation(+List, -Equation)
+% Equation is a canonical, space-free SWI-Prolog string "L=R", where L is
+% an expression over a nonempty prefix of List, R is an expression over
+% the remaining nonempty suffix, every number is used once in order, and
+% both sides have the same integer value. Further equations are produced
+% on backtracking. Fails (finitely) if List has fewer than two elements
+% or no valid equation exists.
+generate_equation(List, Equation) :-
+    split_nonempty(List, LeftNums, RightNums),        % position of '='
+    expression(LeftNums,  LeftTree,  LeftValue),
+    expression(RightNums, RightTree, RightValue),
+    LeftValue =:= RightValue,                         % both sides equal
+    render_expr(LeftTree,  LeftString),
+    render_expr(RightTree, RightString),
+    format(string(Equation), "~w=~w", [LeftString, RightString]).
