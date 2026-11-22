@@ -116,3 +116,11 @@ generate_equation(List, Equation) :-
 all_equations(List, Equations) :-
     findall(Equation, generate_equation(List, Equation), Found),
     sort(Found, Equations).
+
+% count_equations(+List, -N)
+% N is the number of distinct valid equations for List, i.e. the length
+% of the sorted, duplicate-free list produced by all_equations/2.
+% N = 0 when no valid equation exists, including for lists of length 0 or 1.
+count_equations(List, N) :-
+    all_equations(List, Equations),
+    length(Equations, N).
