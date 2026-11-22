@@ -36,3 +36,31 @@
         ;; Phase 1: apply f to the next element, push it onto the accumulator
         (collect (cdr remaining)
                  (cons (f (car remaining)) reversed-result)))))
+
+                 ;; (make-inserter x len-ok?) -> function of one list
+;; Input: x, an atom; len-ok?, a predicate on one number.
+;; Output: a closure that takes a (possibly nested) list. For every list at
+;; every level, including the top-level list, it inserts x at the front if
+;; (len-ok? L) holds, where L is that list's ORIGINAL top-level length.
+;; Atoms are returned unchanged.
+;; Recursion (letrec, mutually recursive local closures):
+;;   process-list: measure lst once, rebuild its elements with my-map, then
+;;                 optionally cons x on the front.
+;;                 base case: '() -> my-map gives '(), so the result is
+;;                 (x) or () depending on (len-ok? 0).
+;;   process-element: a list ('() or a pair) is handed to process-list; an
+;;                    atom is returned as it is.
+(define (make-inserter x len-ok?)
+  (letrec ((process-list
+            (lambda (lst)
+              (let* ((original-length (my-length lst))              ; measured before any insertion
+                     (processed (my-map process-element lst)))      ; recurse into sublists
+                (if (len-ok? original-length)
+                    (cons x processed)
+                    processed))))
+           (process-element
+            (lambda (e)
+              (if (or (pair? e) (null? e))
+                  (process-list e)
+                  e))))
+    process-list))
