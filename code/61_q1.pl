@@ -75,3 +75,13 @@ clue(7, [_Alex, _Ben, _Carla, p('Dana', Dept, Lang, _Project)]) :-
 clue(8, Solution) :-
     member(p(_Name, research, Lang, data), Solution),
     Lang \== javascript.
+
+% count_solutions(+Active, -N)
+% N is the number of candidate assignments for which every clue whose
+% number appears in Active holds; clues not in Active are ignored.
+% An empty Active list imposes no clue, so every candidate is counted.
+count_solutions(Active, N) :-
+    aggregate_all(count,
+                  ( candidate_solution(Solution),
+                    forall(member(C, Active), clue(C, Solution)) ),
+                  N).
