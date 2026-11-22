@@ -76,6 +76,13 @@ clue(8, Solution) :-
     member(p(_Name, research, Lang, data), Solution),
     Lang \== javascript.
 
+% Clue 9 (P1.c): added so that clues 1-9 have exactly one solution.
+% Succeeds when the (unique) person in the design department has embedded
+% as their project; fails otherwise.
+% CLUE 9: The friend working in the design department prefers embedded projects.
+clue(9, Solution) :-
+    member(p(_Name, design, _Lang, embedded), Solution).
+
 % count_solutions(+Active, -N)
 % N is the number of candidate assignments for which every clue whose
 % number appears in Active holds; clues not in Active are ignored.
@@ -85,3 +92,14 @@ count_solutions(Active, N) :-
                   ( candidate_solution(Solution),
                     forall(member(C, Active), clue(C, Solution)) ),
                   N).
+
+% main/0: derives one assignment that satisfies clues 1-8 and prints it as
+% four lines "Name = [Dept, Lang, Project]" in the order Alex, Ben, Carla,
+% Dana. once/1 commits to the first such assignment, so exactly one
+% solution is printed even though clues 1-8 alone allow several.
+main :-
+    once(( candidate_solution(Solution),
+           forall(between(1, 8, K), clue(K, Solution)) )),
+    forall(member(p(Name, Dept, Lang, Project), Solution),
+           format("~w = [~w, ~w, ~w]~n", [Name, Dept, Lang, Project])).
+
