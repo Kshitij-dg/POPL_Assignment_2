@@ -13,3 +13,26 @@
     (if (null? remaining)
         counted
         (loop (cdr remaining) (+ counted 1)))))
+
+;; (my-map f lst) -> new list
+;; Input: f, a one-argument function; lst, a proper list.
+;; Output: a new list holding (f e) for each top-level element e of lst,
+;; in the original order. lst itself is not changed.
+;; Two tail-recursive phases (named lets), so the stack stays constant:
+;;   collect: invariant: reversed-result holds f applied to every element
+;;            already removed from lst, newest first.
+;;            base case: remaining is '() -> go to phase 2.
+;;   restore: invariant: result holds the elements already moved out of
+;;            rev, back in original order.
+;;            base case: rev is '() -> result is the answer ('() for '()).
+(define (my-map f lst)
+  (let collect ((remaining lst) (reversed-result '()))
+    (if (null? remaining)
+        ;; Phase 2: undo the reversal caused by consing onto the accumulator
+        (let restore ((rev reversed-result) (result '()))
+          (if (null? rev)
+              result
+              (restore (cdr rev) (cons (car rev) result))))
+        ;; Phase 1: apply f to the next element, push it onto the accumulator
+        (collect (cdr remaining)
+                 (cons (f (car remaining)) reversed-result)))))
