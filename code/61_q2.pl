@@ -58,3 +58,37 @@ precedence(sub(_, _), 1).
 precedence(mul(_, _), 2).
 precedence(div(_, _), 2).
 precedence(num(_),    3).
+
+
+% render_expr(+Tree, -String)
+% String is the canonical, space-free SWI-Prolog string for the expression
+% Tree. A left child is wrapped in parentheses only if its top operator
+% binds less tightly than its parent's; a right child is wrapped if it
+% binds equally or less tightly. Numbers are never wrapped, so every
+% distinct tree gives a distinct string.
+
+% Base case: a numeric leaf is written in decimal, without parentheses.
+render_expr(num(N), String) :-
+    number_string(N, String).
+
+% Recursive case: render both children, wrap them as the rules require,
+% then join left, operator symbol and right.
+render_expr(Tree, String) :-
+    member(Tree-Symbol, [ add(Left, Right)-(+),
+                          sub(Left, Right)-(-),
+                          mul(Left, Right)-(*),
+                          div(Left, Right)-(/) ]),
+    precedence(Tree,  Parent),
+    precedence(Left,  LeftLevel),
+    precedence(Right, RightLevel),
+    render_expr(Left,  LeftRaw),
+    render_expr(Right, RightRaw),
+    (   LeftLevel < Parent                      % left: strictly lower only
+    ->  format(string(LeftText), "(~w)", [LeftRaw])
+    ;   LeftText = LeftRaw
+    ),
+    (   RightLevel =< Parent                    % right: equal or lower
+    ->  format(string(RightText), "(~w)", [RightRaw])
+    ;   RightText = RightRaw
+    ),
+    format(string(String), "~w~w~w", [LeftText, Symbol, RightText]).
