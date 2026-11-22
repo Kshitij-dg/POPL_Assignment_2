@@ -108,3 +108,11 @@ generate_equation(List, Equation) :-
     render_expr(LeftTree,  LeftString),
     render_expr(RightTree, RightString),
     format(string(Equation), "~w=~w", [LeftString, RightString]).
+% all_equations(+List, -Equations)
+% Equations is the list of every valid canonical equation string for List,
+% without duplicates, in standard order of terms (sort/2).
+% Equations = [] when no valid equation exists, including for lists of
+% length 0 or 1.
+all_equations(List, Equations) :-
+    findall(Equation, generate_equation(List, Equation), Found),
+    sort(Found, Equations).
